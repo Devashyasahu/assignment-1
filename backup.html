@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Book Intro — NGO Landing</title>
+<style>
+  /*
+  ==============================================
+  Global Styles & Variables
+  - Defines CSS variables for colors, fonts.
+  - Resets default browser styles.
+  ==============================================
+  */
+  :root {
+    --paper: #fff8e6;
+    --cover: #8b4513;
+    --spine: #6b3510;
+    --accent: #cfa15a;
+    --text: #2b2b2b;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: "Georgia", serif;
+    background: linear-gradient(180deg, #f2e8d8 0%, #efe7d3 50%, #efeae1 100%);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    overflow: hidden; /* This locks the scroll initially */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 2000px;
+    height: 100vh;
+  }
+  
+  /*
+  ==============================================
+  Layout & Book Container
+  - Styles for the main hero section and the book wrapper.
+  - Centers the book on the screen.
+  - Sets up the 3D perspective for the book.
+  ==============================================
+  */
+  .hero {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    user-select: none;
+  }
+
+  .book-wrap {
+    width: 900px;
+    max-width: 92vw;
+    height: 520px;
+    max-height: 75vh;
+    perspective: 2200px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .book {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+  
+  /*
+  ==============================================
+  Book Parts: Spine, Cover, Pages
+  - Defines the visual appearance of the book components.
+  - Uses CSS transforms for 3D rotation and stacking.
+  - `transition` properties are key for smooth animations.
+  ==============================================
+  */
+  .spine {
+    position: absolute;
+    left: calc(50% - 8px);
+    top: 30px;
+    width: 16px;
+    height: calc(100% - 60px);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.04));
+    border-radius: 3px;
+    z-index: 5;
+    transform-origin: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), inset 0 0 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .cover {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(180deg, var(--cover), #7a3e10);
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
+    transform-origin: left center;
+    backface-visibility: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: none;
+  }
+
+  .page {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: var(--paper);
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.1);
+    transform-origin: left center;
+    transform: rotateY(0deg);
+    backface-visibility: hidden;
+    transition: box-shadow 0.1s ease-out;
+  }
+  
+  .page::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(to left, transparent, rgba(0, 0, 0, 0.1));
+    opacity: 0;
+    transition: opacity 0.1s ease-out;
+    pointer-events: none;
+  }
+  
+  .page.turn::before {
+    opacity: 1;
+  }
+  
+  /* Stacking the pages with z-index */
+  .page:nth-child(2) { z-index: 7; }
+  .page:nth-child(3) { z-index: 6; }
+  .page:nth-child(4) { z-index: 5; }
+  .page:nth-child(5) { z-index: 4; }
+  
+  /*
+  ==============================================
+  Animation Classes (applied by JavaScript)
+  - These classes define the final state of the book elements after a "turn".
+  - JavaScript toggles these classes to trigger the CSS transitions.
+  ==============================================
+  */
+  .cover.turn { 
+    transform: rotateY(-165deg); 
+    z-index: 10;
+    box-shadow: -15px 0 30px rgba(0, 0, 0, 0.3), 0 30px 60px rgba(0, 0, 0, 0.25);
+  }
+  .page.turn { 
+    transform: rotateY(-180deg);
+    z-index: 10;
+    box-shadow: -20px 0 40px rgba(0, 0, 0, 0.4), inset 0 0 1px rgba(0, 0, 0, 0.1);
+  }
+
+  .content {
+    padding: 36px;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  
+  .book.open .content {
+    opacity: 1;
+  }
+
+  /*
+  ==============================================
+  Content & Form Styling
+  - Styles for the inner text, headings, and the volunteer form.
+  - Designed to look like a clean, readable book page.
+  ==============================================
+  */
+  .logo { 
+    width: 70%; 
+    height: 70%; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(2px);
+  }
+  .logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+  .cover::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 6px solid rgba(255, 255, 255, 0.03);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  h1, h2 { margin: 0 0 12px 0; font-weight: 700; color: #1f1f1f; }
+  p { line-height: 1.55; color: #222; margin-bottom: 12px; }
+
+  .vol-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.95));
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(30, 30, 30, 0.08);
+    width: 100%;
+    max-width: 380px;
+  }
+  .vol-card label { display: block; font-size: 0.9rem; margin: 8px 0 4px; }
+  .vol-card input, .vol-card textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    font-family: inherit;
+    font-size: 0.95rem;
+  }
+  .vol-card button {
+    margin-top: 12px;
+    background: var(--cover);
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  /*
+  ==============================================
+  Parallax & Scroll Hint
+  - Background layers that move at different speeds.
+  - The "Scroll to open" hint at the bottom.
+  ==============================================
+  */
+  .parallax {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .layer {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 160vw;
+    height: 80vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 20px 40px rgba(30, 30, 30, 0.08));
+    opacity: 0.95;
+    transition: transform 1s ease-out;
+  }
+  .layer.l1 {
+    background: radial-gradient(1200px 300px at 10% 20%, rgba(255, 255, 255, 0.45), transparent 10%), linear-gradient(90deg, rgba(255, 248, 230, 0.9), rgba(255, 243, 230, 0.6));
+  }
+  .layer.l2 {
+    width: 140vw;
+    height: 60vh;
+    background-image: radial-gradient(circle at 20% 40%, rgba(200, 170, 120, 0.06) 0 8%, transparent 12%), radial-gradient(circle at 80% 60%, rgba(180, 140, 90, 0.04) 0 6%, transparent 11%);
+  }
+
+  .hint {
+    position: absolute;
+    bottom: -70px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #6b4a2a;
+    font-size: 0.95rem;
+    opacity: 0.95;
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .chev {
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid #6b4a2a;
+    border-bottom: 2px solid #6b4a2a;
+    transform: rotate(45deg);
+    animation: down 1s infinite;
+  }
+
+  @keyframes down {
+    0% { transform: translateY(0) rotate(45deg); }
+    50% { transform: translateY(8px) rotate(45deg); }
+    100% { transform: translateY(0) rotate(45deg); }
+  }
+</style>
+</head>
+<body>
+
+<div class="parallax" aria-hidden="true">
+  <div class="layer l1"></div>
+  <div class="layer l2"></div>
+</div>
+
+<section class="hero" aria-labelledby="title">
+  <div class="book-wrap" role="region" aria-label="Interactive book">
+    <div class="book" id="book">
+      <div class="spine" aria-hidden="true"></div>
+
+      <div class="cover" id="cover">
+        <div class="logo" aria-hidden="true">
+          <img src="assests/logo.png" alt="Book Cover Logo">
+        </div>
+      </div>
+      
+      <div class="page" id="page1">
+        <div class="content">
+          <h1 id="title">Our Story</h1>
+          <p>We began as a small group of volunteers teaching children in tiny corners of the city. Over time, our classroom grew, and so did our hope — that every child can learn, thrive, and dream bigger.</p>
+        </div>
+      </div>
+      
+      <div class="page" id="page2">
+        <div class="content">
+          <h2>Our Programs</h2>
+          <p>We believe education is the first step toward lasting change. Our programs include community learning centers, reading programs, and mentorship for young students.</p>
+        </div>
+      </div>
+      
+      <div class="page" id="page3">
+        <div class="content">
+          <h2>Community Impact</h2>
+          <p>Over the past five years, we've helped over 500 children improve their reading skills and confidence. Our goal is to expand our reach to more underserved communities.</p>
+        </div>
+      </div>
+      
+      <div class="page" id="page4">
+        <div class="content" aria-live="polite">
+          <h2>Become a Volunteer</h2>
+          <p>Join us — your time, skills, and kindness create real opportunity. Fill the form to get started.</p>
+          <div class="vol-card" id="volCard">
+            <form id="volForm">
+              <label for="name">Full name</label>
+              <input id="name" name="name" type="text" placeholder="Your name" required>
+              <label for="email">Email</label>
+              <input id="email" name="email" type="email" placeholder="you@example.com" required>
+              <label for="why">Why do you want to volunteer?</label>
+              <textarea id="why" name="why" rows="4" placeholder="A short note..." required></textarea>
+              <button type="submit">Join the Team</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hint"><div class="chev"></div><div>Scroll to open</div></div>
+  </div>
+</section>
+
+<script>
+  /*
+  ==============================================
+  Book Interaction Logic
+  - Handles continuous scroll-driven book opening.
+  - Creates smooth, realistic page turning animation.
+  - Manages scroll progress and rotation angles.
+  ==============================================
+  */
+  const book = document.getElementById('book');
+  const cover = document.getElementById('cover');
+  const pages = document.querySelectorAll('.page');
+  const body = document.body;
+  const pageElements = [cover, ...pages];
+  
+  // Store how much the book has been opened (0 = closed, 1 = fully open)
+  let scrollProgress = 0;
+  let isAnimating = false;
+
+  function updateBookRotation(progress) {
+    // Calculate rotation for each page element
+    pageElements.forEach((element, index) => {
+      const totalPages = pageElements.length;
+      const pageThreshold = index / totalPages;
+      const nextThreshold = (index + 1) / totalPages;
+      
+      let rotation = 0;
+      if (progress >= pageThreshold) {
+        // Page should be turning or turned
+        const pageProgress = Math.min(1, (progress - pageThreshold) / (nextThreshold - pageThreshold));
+        rotation = pageProgress * -180;
+      }
+      
+      element.style.transform = `rotateY(${rotation}deg)`;
+      
+      // Add shadow effects during rotation
+      if (rotation > -90 && rotation < 0) {
+        const shadowIntensity = Math.abs(rotation) / 90;
+        element.style.boxShadow = `-${15 + shadowIntensity * 10}px 0 ${30 + shadowIntensity * 20}px rgba(0, 0, 0, ${0.2 + shadowIntensity * 0.3})`;
+      } else if (rotation <= -90) {
+        element.style.boxShadow = '-25px 0 50px rgba(0, 0, 0, 0.5)';
+      } else {
+        element.style.boxShadow = '';
+      }
+    });
+    
+    // Update book open state
+    if (progress > 0) {
+      book.classList.add('open');
+    } else {
+      book.classList.remove('open');
+    }
+    
+    // Control page scrolling
+    if (progress >= 1) {
+      body.style.overflow = 'auto';
+    } else {
+      body.style.overflow = 'hidden';
+    }
+  }
+
+  window.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    
+    // Smooth scroll sensitivity
+    const scrollSensitivity = 0.0015;
+    scrollProgress += e.deltaY * scrollSensitivity;
+    
+    // Clamp progress between 0 and 1
+    scrollProgress = Math.max(0, Math.min(1, scrollProgress));
+    
+    // Update book rotation
+    updateBookRotation(scrollProgress);
+    
+    // Throttle rapid scrolling
+    if (!isAnimating) {
+      isAnimating = true;
+      setTimeout(() => { isAnimating = false; }, 50);
+    }
+  }, { passive: false });
+  
+  // Initialize book in closed state
+  updateBookRotation(0);
+
+  /*
+  ==============================================
+  Form Submission & Confetti
+  - Handles the volunteer form submission with visual feedback.
+  - Triggers a confetti animation for a celebratory effect.
+  ==============================================
+  */
+  const form = document.getElementById('volForm');
+  form.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const name = form.name.value.trim() || "Friend";
+    const btn = form.querySelector('button');
+    btn.disabled = true;
+    btn.textContent = "Thanks, " + (name.split(' ')[0] || name) + "!";
+    btn.style.background = "linear-gradient(90deg, #6d2f08, #8b4513)";
+    burstConfetti(btn);
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = "Join the Team";
+      btn.style.background = "";
+      form.reset();
+    }, 2200);
+  });
+
+  function burstConfetti(anchor) {
+    const root = document.createElement('div');
+    root.style.position = 'fixed';
+    root.style.left = '50%';
+    root.style.top = '50%';
+    root.style.transform = 'translate(-50%, -50%)';
+    root.style.pointerEvents = 'none';
+    root.style.zIndex = 9999;
+    document.body.appendChild(root);
+    const colors = ['#f94144', '#f9c74f', '#90be6d', '#577590', '#f9844a', '#277da1'];
+    for (let i = 0; i < 28; i++) {
+      const s = document.createElement('div');
+      const size = 6 + Math.random() * 10;
+      s.style.width = size + 'px';
+      s.style.height = size + 'px';
+      s.style.background = colors[Math.floor(Math.random() * colors.length)];
+      s.style.position = 'absolute';
+      s.style.left = '0';
+      s.style.top = '0';
+      s.style.borderRadius = (Math.random() > 0.6 ? '3px' : '50%');
+      s.style.opacity = 1;
+      s.style.transform = `translate3d(${(Math.random() - 0.5) * 200}px, ${(Math.random() - 0.5) * 200}px, 0) rotate(${Math.random() * 360}deg)`;
+      s.style.transition = 'transform 1.2s cubic-bezier(.2,.8,.2,1), opacity 1.2s ease';
+      root.appendChild(s);
+      requestAnimationFrame(() => {
+        s.style.transform = `translate3d(${(Math.random() - 0.5) * 450}px, ${-200 - Math.random() * 200}px, 0) rotate(${Math.random() * 720}deg)`;
+        s.style.opacity = 0;
+      });
+    }
+    setTimeout(() => root.remove(), 1300);
+  }
+</script>
+</body>
+</html>

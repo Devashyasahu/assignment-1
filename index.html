@@ -1,0 +1,71 @@
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>assignment</title>
+  <link rel="stylesheet" href="style.css" >
+ </head>
+ <body>
+
+  <div class="parallax" aria-hidden="true">
+    <div class="layer l1"></div>
+    <div class="layer l2"></div>
+  </div>
+  
+  <section class="hero" aria-labelledby="title">
+    <div class="book-wrap" role="region" aria-label="Interactive book">
+      <div class="book" id="book">
+        <div class="spine" aria-hidden="true"></div>
+  
+        <div class="cover" id="cover">
+          <div class="logo" aria-hidden="true">
+            <img src="assests/logo.png" alt="Book Cover Logo">
+          </div>
+        </div>
+        
+        <div class="page" id="page1">
+          <div class="content">
+            <h1 id="title">Our Story</h1>
+            <p>We began as a small group of volunteers teaching children in tiny corners of the city. Over time, our classroom grew, and so did our hope — that every child can learn, thrive, and dream bigger.</p>
+          </div>
+        </div>
+        
+        <div class="page" id="page2">
+          <div class="content">
+            <h2>Our Programs</h2>
+            <p>We believe education is the first step toward lasting change. Our programs include community learning centers, reading programs, and mentorship for young students.</p>
+          </div>
+        </div>
+        
+        <div class="page" id="page3">
+          <div class="content">
+            <h2>Community Impact</h2>
+            <p>Over the past five years, we've helped over 500 children improve their reading skills and confidence. Our goal is to expand our reach to more underserved communities.</p>
+          </div>
+        </div>
+        
+        <div class="page" id="page4">
+          <div class="content" aria-live="polite">
+            <h2>Become a Volunteer</h2>
+            <p>Join us — your time, skills, and kindness create real opportunity. Fill the form to get started.</p>
+            <div class="vol-card" id="volCard">
+              <form id="volForm">
+                <label for="name">Full name</label>
+                <input id="name" name="name" type="text" placeholder="Your name" required>
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" placeholder="you@example.com" required>
+                <label for="why">Why do you want to volunteer?</label>
+                <textarea id="why" name="why" rows="4" placeholder="A short note..." required></textarea>
+                <button type="submit">Join the Team</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hint"><div class="chev"></div><div>Scroll to open</div></div>
+    </div>
+  </section>
+  <script src="index.js"></script>
+</body>
+</html>

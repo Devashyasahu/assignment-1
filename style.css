@@ -1,0 +1,306 @@
+ /*
+  ==============================================
+  Global Styles & Variables
+  - Defines CSS variables for colors, fonts.
+  - Resets default browser styles.
+  ==============================================
+  */
+  :root {
+    --paper: #fff8e6;
+    --cover: #8b4513;
+    --spine: #6b3510;
+    --accent: #cfa15a;
+    --text: #2b2b2b;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: "Georgia", serif;
+    background: linear-gradient(180deg, #f2e8d8 0%, #efe7d3 50%, #efeae1 100%);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    overflow: hidden; /* This locks the scroll initially */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 2000px;
+    height: 100vh;
+  }
+  
+  /*
+  ==============================================
+  Layout & Book Container
+  - Styles for the main hero section and the book wrapper.
+  - Centers the book on the screen.
+  - Sets up the 3D perspective for the book.
+  ==============================================
+  */
+  .hero {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    user-select: none;
+  }
+
+  .book-wrap {
+    width: 900px;
+    max-width: 92vw;
+    height: 520px;
+    max-height: 75vh;
+    perspective: 2200px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .book {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+  }
+  
+  /*
+  ==============================================
+  Book Parts: Spine, Cover, Pages
+  - Defines the visual appearance of the book components.
+  - Uses CSS transforms for 3D rotation and stacking.
+  - `transition` properties are key for smooth animations.
+  ==============================================
+  */
+  .spine {
+    position: absolute;
+    left: calc(50% - 8px);
+    top: 30px;
+    width: 16px;
+    height: calc(100% - 60px);
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.04));
+    border-radius: 3px;
+    z-index: 5;
+    transform-origin: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), inset 0 0 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .cover {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(180deg, var(--cover), #7a3e10);
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
+    transform-origin: left center;
+    backface-visibility: hidden;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.25);
+    z-index: 8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transition: none;
+  }
+
+  .page {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 50%;
+    height: 100%;
+    background: var(--paper);
+    box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.1);
+    transform-origin: left center;
+    transform: rotateY(0deg);
+    backface-visibility: hidden;
+    transition: box-shadow 0.1s ease-out;
+  }
+  
+  .page::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(to left, transparent, rgba(0, 0, 0, 0.1));
+    opacity: 0;
+    transition: opacity 0.1s ease-out;
+    pointer-events: none;
+  }
+  
+  .page.turn::before {
+    opacity: 1;
+  }
+  
+  /* Stacking the pages with z-index */
+  .page:nth-child(2) { z-index: 7; }
+  .page:nth-child(3) { z-index: 6; }
+  .page:nth-child(4) { z-index: 5; }
+  .page:nth-child(5) { z-index: 4; }
+  
+  /*
+  ==============================================
+  Animation Classes (applied by JavaScript)
+  - These classes define the final state of the book elements after a "turn".
+  - JavaScript toggles these classes to trigger the CSS transitions.
+  ==============================================
+  */
+  .cover.turn { 
+    transform: rotateY(-165deg); 
+    z-index: 10;
+    box-shadow: -15px 0 30px rgba(0, 0, 0, 0.3), 0 30px 60px rgba(0, 0, 0, 0.25);
+  }
+  .page.turn { 
+    transform: rotateY(-180deg);
+    z-index: 10;
+    box-shadow: -20px 0 40px rgba(0, 0, 0, 0.4), inset 0 0 1px rgba(0, 0, 0, 0.1);
+  }
+
+  .content {
+    padding: 36px;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+  
+  .book.open .content {
+    opacity: 1;
+  }
+
+  /*
+  ==============================================
+  Content & Form Styling
+  - Styles for the inner text, headings, and the volunteer form.
+  - Designed to look like a clean, readable book page.
+  ==============================================
+  */
+  .logo { 
+    width: 70%; 
+    height: 70%; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1), 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(2px);
+  }
+  .logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  }
+  .cover::after {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border: 6px solid rgba(255, 255, 255, 0.03);
+    mix-blend-mode: overlay;
+    pointer-events: none;
+  }
+
+  h1, h2 { margin: 0 0 12px 0; font-weight: 700; color: #1f1f1f; }
+  p { line-height: 1.55; color: #222; margin-bottom: 12px; }
+
+  .vol-card {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.95));
+    border-radius: 10px;
+    padding: 18px;
+    box-shadow: 0 10px 30px rgba(30, 30, 30, 0.08);
+    width: 100%;
+    max-width: 380px;
+  }
+  .vol-card label { display: block; font-size: 0.9rem; margin: 8px 0 4px; }
+  .vol-card input, .vol-card textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    font-family: inherit;
+    font-size: 0.95rem;
+  }
+  .vol-card button {
+    margin-top: 12px;
+    background: var(--cover);
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  /*
+  ==============================================
+  Parallax & Scroll Hint
+  - Background layers that move at different speeds.
+  - The "Scroll to open" hint at the bottom.
+  ==============================================
+  */
+  .parallax {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .layer {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 160vw;
+    height: 80vh;
+    background-repeat: no-repeat;
+    background-position: center;
+    filter: drop-shadow(0 20px 40px rgba(30, 30, 30, 0.08));
+    opacity: 0.95;
+    transition: transform 1s ease-out;
+  }
+  .layer.l1 {
+    background: radial-gradient(1200px 300px at 10% 20%, rgba(255, 255, 255, 0.45), transparent 10%), linear-gradient(90deg, rgba(255, 248, 230, 0.9), rgba(255, 243, 230, 0.6));
+  }
+  .layer.l2 {
+    width: 140vw;
+    height: 60vh;
+    background-image: radial-gradient(circle at 20% 40%, rgba(200, 170, 120, 0.06) 0 8%, transparent 12%), radial-gradient(circle at 80% 60%, rgba(180, 140, 90, 0.04) 0 6%, transparent 11%);
+  }
+
+  .hint {
+    position: absolute;
+    bottom: -70px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: #6b4a2a;
+    font-size: 0.95rem;
+    opacity: 0.95;
+    z-index: 10;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .chev {
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid #6b4a2a;
+    border-bottom: 2px solid #6b4a2a;
+    transform: rotate(45deg);
+    animation: down 1s infinite;
+  }
+
+  @keyframes down {
+    0% { transform: translateY(0) rotate(45deg); }
+    50% { transform: translateY(8px) rotate(45deg); }
+    100% { transform: translateY(0) rotate(45deg); }
+  }
